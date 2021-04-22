@@ -49,6 +49,21 @@ func (trie *Trie) Search(word string) bool{
 	return trie.isWord
 }
 
+// Delete 删除
+func (trie *Trie) Delete(word string)  {
+	// 遍历字符串
+	for _, w := range word {
+		// 如果发现有字符不存在，则说明不匹配
+		if trie.children[w] == nil {
+			return
+		}
+		// 继续遍历
+		trie = trie.children[w]
+	}
+
+	trie.isWord = false
+}
+
 // New 实例化
 func New() *Trie {
 	return &Trie{
