@@ -2,12 +2,33 @@ package trie
 
 import (
 	"github.com/stretchr/testify/assert"
+	"strconv"
+	"sync"
 	"testing"
 )
 
 func TestTrie_Insert(t *testing.T) {
 	trie := New()
-	trie.Insert("Hello")
+
+	wg := sync.WaitGroup{}
+	wg.Add(10000)
+	for i := 0; i < 10000; i++ {
+		go func(i int) {
+			trie.Insert("hello" + strconv.Itoa(i))
+			wg.Done()
+		}(i)
+
+	}
+
+	wg.Wait()
+
+}
+
+func BenchmarkTrie_Insert(b *testing.B) {
+	trie := New()
+	for i := 0; i < b.N; i++ {
+		trie.Insert("hello" + strconv.Itoa(i))
+	}
 }
 
 func TestTrie_Search(t *testing.T) {

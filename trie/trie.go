@@ -1,5 +1,7 @@
 package trie
 
+import "sync"
+
 type nodeType int
 const(
 	rootNode nodeType = iota // 根节点
@@ -12,6 +14,8 @@ const(
 
 // Trie 字典树
 type Trie struct {
+	// lock for map
+	mu sync.RWMutex
 	// 子节点
 	children map[rune]*Trie
 	// 节点类型
@@ -20,6 +24,8 @@ type Trie struct {
 
 // Insert 插入元素
 func (trie *Trie) Insert(word string) {
+	trie.mu.Lock()
+	defer trie.mu.Unlock()
 	for _, w := range word {
 		if trie.children[w] == nil { // 不存在子节点
 			// 初始化新的子节点
@@ -35,6 +41,8 @@ func (trie *Trie) Insert(word string) {
 }
 // Search 查询
 func (trie *Trie) Search(word string) bool{
+	trie.mu.RLock()
+	defer trie.mu.RUnlock()
 	// 遍历字符串
 	for _, w := range word {
 		// 如果发现有字符不存在，则说明不匹配
@@ -51,6 +59,8 @@ func (trie *Trie) Search(word string) bool{
 
 // Delete 删除
 func (trie *Trie) Delete(word string)  {
+	trie.mu.RLock()
+	defer trie.mu.RUnlock()
 	// 遍历字符串
 	for _, w := range word {
 		// 如果发现有字符不存在，则说明不匹配
