@@ -1,81 +1,37 @@
 package trie
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
-	"strconv"
-	"sync"
 	"testing"
 )
 
-func TestRadixTree_ComparePrefix(t *testing.T) {
-	trie := NewRadixTree()
-
-	wg := sync.WaitGroup{}
-	wg.Add(10000)
-	for i := 0; i < 10000; i++ {
-		go func(i int) {
-			trie.Insert("hello" + strconv.Itoa(i))
-			wg.Done()
-		}(i)
-
-	}
-
-	wg.Wait()
-}
-
-func BenchmarkRadixTree_Insert(b *testing.B) {
-	trie := NewRadixTree()
-	for i := 0; i < b.N; i++ {
-		trie.Insert("hello" + strconv.Itoa(i))
-	}
-}
-
 func TestRadixTree_Insert(t *testing.T) {
-	trie := NewRadixTree()
-	words := []string{"sex","sleep","son", "se"}
-	for _, word := range words {
-		trie.Insert(word)
+	tree := NewRadixTree()
+	tests := []struct {
+		name string
+		key string
+		val interface{}
+	}{
+		{
+			name: "number",
+			key:  "ten",
+			val:  10,
+		},
+		{
+			name: "string",
+			key:  "hello",
+			val:  "world",
+		},
+		{
+			name: "sex",
+			key:  "sex",
+			val:  "性别",
+		},
 	}
-	fmt.Println(trie)
-}
-
-func TestRadixTree_Search(t *testing.T) {
-	trie := NewRadixTree()
-	words := []string{"s","sex","sleep","son", "se"}
-	for _, word := range words {
-		trie.Insert(word)
+	for _, test := range tests {
+		tree.Insert(test.key, test.val)
+		t.Run(test.name, func(t *testing.T) {
+			assert.Equal(t, test.val, tree.GetValue(test.key))
+		})
 	}
-	for _, word := range words {
-		assert.True(t, trie.Search(word))
-	}
-
-	assert.False(t, trie.Search("hello"))
-}
-
-func BenchmarkRadixTree_Search(b *testing.B) {
-	trie := NewRadixTree()
-	words := []string{"s","sex","sleep","son", "se"}
-	for _, word := range words {
-		trie.Insert(word)
-	}
-	for i := 0; i < b.N; i++ {
-		trie.Search("sleep")
-	}
-}
-
-
-func TestRadixTree_Delete(t *testing.T) {
-	trie := NewRadixTree()
-	words := []string{"sex","sleep","son", "se"}
-	for _, word := range words {
-		trie.Insert(word)
-	}
-	assert.True(t, trie.Search("sex"))
-	assert.True(t, trie.Search("se"))
-	trie.Delete("sex")
-	assert.False(t, trie.Search("sex"))
-	assert.True(t, trie.Search("se"))
-	trie.Delete("se")
-	assert.False(t, trie.Search("se"))
 }
