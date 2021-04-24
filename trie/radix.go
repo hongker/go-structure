@@ -34,8 +34,7 @@ func (rt *RadixTree) comparePrefix(s1, s2 string) int {
 	return i
 }
 
-// Insert 插入
-func (rt *RadixTree) Insert(word string, val interface{}) {
+func (rt *RadixTree) insert(word string, val interface{}, children map[string]*RadixTree) {
 	// lock for concurrent map
 	rt.mu.Lock()
 	defer rt.mu.Unlock()
@@ -67,12 +66,12 @@ func (rt *RadixTree) Insert(word string, val interface{}) {
 		delete(rt.children, s)
 		node := newRadixTreeNode(false)
 		// 插入原节点的剩余部分
-		node.Insert(s[idx:], child.val)
+		node.insert(s[idx:], child.val, child.children)
 		// 如果插入字符串和前缀一致，则标记新节点为字符串节点
 		if word == samePrefix {
 			node.isWord = true
 		}else { // 只是部分相同，则插入剩余部分
-			node.Insert(word[idx:], val)
+			node.insert(word[idx:], val, child.children)
 		}
 		// 绑定新的子节点
 		rt.children[samePrefix] = node
@@ -83,7 +82,15 @@ func (rt *RadixTree) Insert(word string, val interface{}) {
 	// 遍历完子节点，依然没有找到拥有共同前缀的时候，就新插入一个节点,比如 hello和world没有共同前缀，则插入新的world节点
 	node := newRadixTreeNode(true)
 	node.val = val
+	if len(children) != 0 {
+		node.children = children
+	}
 	rt.children[word] = node
+}
+
+// Insert 插入
+func (rt *RadixTree) Insert(word string, val interface{}) {
+	rt.insert(word, val, nil)
 }
 
 // Search 查询
