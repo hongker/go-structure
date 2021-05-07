@@ -7,31 +7,10 @@ import (
 
 func TestRadixTree_Insert(t *testing.T) {
 	tree := NewRadixTree()
-	tests := []struct {
-		name string
-		key string
-		val interface{}
-	}{
-		{
-			name: "number",
-			key:  "ten",
-			val:  10,
-		},
-		{
-			name: "string",
-			key:  "hello",
-			val:  "world",
-		},
-		{
-			name: "sex",
-			key:  "sex",
-			val:  "性别",
-		},
-	}
-	for _, test := range tests {
-		tree.Insert(test.key, test.val)
-		t.Run(test.name, func(t *testing.T) {
-			assert.Equal(t, test.val, tree.GetValue(test.key))
-		})
-	}
+	tree.Insert("/user/list", 1)
+	tree.Insert("/user/create", 2)
+	tree.Insert("/index", 3)
+	assert.Equal(t, 1, tree.GetValue("/user/list"))
+	assert.Equal(t, 2, tree.GetValue("/user/create"))
+	assert.Equal(t, 3, tree.GetValue("/index"))
 }
